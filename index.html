@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFC Quick Message</title>
+</head>
+<body>
+    <h2>Set Up Your Contact & Message</h2>
+
+    <label for="phoneNumber">Phone Number:</label>
+    <input type="tel" id="phoneNumber" placeholder="Enter phone number">
+    
+    <br><br>
+
+    <label for="messageSelect">Choose a Message:</label>
+    <select id="messageSelect" onchange="checkCustomMessage()">
+        <option value="I'm home">I'm home</option>
+        <option value="On my way">On my way</option>
+        <option value="Stuck in traffic">Stuck in traffic</option>
+        <option value="At the store, need anything?">At the store, need anything?</option>
+        <option value="Custom">Custom Message...</option>
+    </select>
+
+    <br><br>
+
+    <input type="text" id="customMessage" placeholder="Enter your message" style="display:none;">
+
+    <br><br>
+
+    <button onclick="saveData()">Save</button>
+    <p id="message"></p>
+
+    <script>
+        function checkCustomMessage() {
+            let messageSelect = document.getElementById("messageSelect").value;
+            let customMessageBox = document.getElementById("customMessage");
+
+            if (messageSelect === "Custom") {
+                customMessageBox.style.display = "block";
+            } else {
+                customMessageBox.style.display = "none";
+            }
+        }
+
+        function saveData() {
+            let number = document.getElementById("phoneNumber").value;
+            let messageSelect = document.getElementById("messageSelect").value;
+            let customMessageBox = document.getElementById("customMessage").value;
+
+            let finalMessage = (messageSelect === "Custom") ? customMessageBox : messageSelect;
+
+            if (number && finalMessage) {
+                localStorage.setItem("savedNumber", number);
+                localStorage.setItem("savedMessage", finalMessage);
+                document.getElementById("message").innerText = "Saved! Tap the NFC tag again to send a message.";
+            }
+        }
+
+        function sendMessage() {
+            let savedNumber = localStorage.getItem("savedNumber");
+            let savedMessage = localStorage.getItem("savedMessage");
+
+            if (savedNumber && savedMessage) {
+                window.location.href = `sms:${savedNumber}?body=${encodeURIComponent(savedMessage)}`;
+            }
+        }
+
+        // If user already saved a number and message, send the message immediately
+        if (localStorage.getItem("savedNumber") && localStorage.getItem("savedMessage")) {
+            sendMessage();
+        }
+    </script>
+</body>
+</html>
