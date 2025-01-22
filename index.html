@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFC Quick Message</title>
+    <title>NFC Group Text</title>
 </head>
 <body>
-    <h2>Set Up Your Contact & Message</h2>
+    <h2>Set Up Your Group Chat</h2>
 
-    <label for="phoneNumber">Phone Number:</label>
-    <input type="tel" id="phoneNumber" placeholder="Enter phone number">
-    
+    <label for="phoneNumbers">Phone Numbers (comma-separated):</label>
+    <input type="text" id="phoneNumbers" placeholder="e.g. +1234567890, +0987654321">
+
     <br><br>
 
     <label for="messageSelect">Choose a Message:</label>
@@ -44,30 +44,31 @@
         }
 
         function saveData() {
-            let number = document.getElementById("phoneNumber").value;
+            let numbers = document.getElementById("phoneNumbers").value;
             let messageSelect = document.getElementById("messageSelect").value;
             let customMessageBox = document.getElementById("customMessage").value;
 
             let finalMessage = (messageSelect === "Custom") ? customMessageBox : messageSelect;
 
-            if (number && finalMessage) {
-                localStorage.setItem("savedNumber", number);
+            if (numbers && finalMessage) {
+                localStorage.setItem("savedNumbers", numbers);
                 localStorage.setItem("savedMessage", finalMessage);
                 document.getElementById("message").innerText = "Saved! Tap the NFC tag again to send a message.";
             }
         }
 
         function sendMessage() {
-            let savedNumber = localStorage.getItem("savedNumber");
+            let savedNumbers = localStorage.getItem("savedNumbers");
             let savedMessage = localStorage.getItem("savedMessage");
 
-            if (savedNumber && savedMessage) {
-                window.location.href = `sms:${savedNumber}?body=${encodeURIComponent(savedMessage)}`;
+            if (savedNumbers && savedMessage) {
+                let formattedNumbers = savedNumbers.replace(/\s+/g, ''); // Remove spaces
+                window.location.href = `sms:${formattedNumbers}?body=${encodeURIComponent(savedMessage)}`;
             }
         }
 
-        // If user already saved a number and message, send the message immediately
-        if (localStorage.getItem("savedNumber") && localStorage.getItem("savedMessage")) {
+        // If user already saved data, auto-send the message
+        if (localStorage.getItem("savedNumbers") && localStorage.getItem("savedMessage")) {
             sendMessage();
         }
     </script>
