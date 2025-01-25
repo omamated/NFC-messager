@@ -3,15 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFC Group Text</title>
+    <title>NFC Quick Share</title>
 </head>
 <body>
-    <h2>Set Up Your Group Chat</h2>
-
-    <label for="phoneNumbers">Phone Numbers (comma-separated if you want to text multiple):</label>
-    <input type="text" id="phoneNumbers" placeholder="e.g. +1234567890, +0987654321">
-
-    <br><br>
+    <h2>Send a Quick Message</h2>
 
     <label for="messageSelect">Choose a Message:</label>
     <select id="messageSelect" onchange="checkCustomMessage()">
@@ -28,8 +23,7 @@
 
     <br><br>
 
-    <button onclick="saveData()">Save</button>
-    <p id="message"></p>
+    <button onclick="shareMessage()">Send Message</button>
 
     <script>
         function checkCustomMessage() {
@@ -43,33 +37,22 @@
             }
         }
 
-        function saveData() {
-            let numbers = document.getElementById("phoneNumbers").value;
+        function shareMessage() {
             let messageSelect = document.getElementById("messageSelect").value;
             let customMessageBox = document.getElementById("customMessage").value;
 
             let finalMessage = (messageSelect === "Custom") ? customMessageBox : messageSelect;
 
-            if (numbers && finalMessage) {
-                localStorage.setItem("savedNumbers", numbers);
-                localStorage.setItem("savedMessage", finalMessage);
-                document.getElementById("message").innerText = "Saved! Tap the NFC tag again to send a message.";
+            if (navigator.share) {
+                navigator.share({
+                    title: "Quick Message",
+                    text: finalMessage
+                })
+                .then(() => console.log("Message shared!"))
+                .catch(err => console.log("Sharing failed:", err));
+            } else {
+                alert("Sharing is not supported on this browser.");
             }
-        }
-
-        function sendMessage() {
-            let savedNumbers = localStorage.getItem("savedNumbers");
-            let savedMessage = localStorage.getItem("savedMessage");
-
-            if (savedNumbers && savedMessage) {
-                let formattedNumbers = savedNumbers.replace(/\s+/g, ''); // Remove spaces
-                window.location.href = `sms:${formattedNumbers}?body=${encodeURIComponent(savedMessage)}`;
-            }
-        }
-
-        // If user already saved data, auto-send the message
-        if (localStorage.getItem("savedNumbers") && localStorage.getItem("savedMessage")) {
-            sendMessage();
         }
     </script>
 </body>
