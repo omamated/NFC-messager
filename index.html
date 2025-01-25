@@ -40,10 +40,9 @@
 
     <script>
         let selectedRecipient = localStorage.getItem("savedRecipient") || "";
+        let savedMessage = localStorage.getItem("savedMessage");
 
         window.onload = function () {
-            let savedMessage = localStorage.getItem("savedMessage");
-
             if (savedMessage) {
                 document.getElementById("messageSelect").value = savedMessage;
                 checkCustomMessage();
@@ -86,6 +85,9 @@
                     if (recipient) {
                         selectedRecipient = recipient;
                         document.getElementById("selectedRecipient").innerText = "Saved Contact: " + recipient;
+
+                        // Save recipient immediately after selection
+                        localStorage.setItem("savedRecipient", selectedRecipient);
                     }
                 }).catch(err => console.log("Sharing failed:", err));
             } else {
