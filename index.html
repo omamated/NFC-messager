@@ -6,7 +6,15 @@
     <title>NFC Quick Share</title>
 </head>
 <body>
-    <h2>Send a Quick Message</h2>
+    <h2>NFC Quick Message Setup</h2>
+
+    <p><strong>How It Works:</strong></p>
+    <ol>
+        <li>Choose a message from the list.</li>
+        <li>Tap "Choose Contact" and select a recipient from the share popup.</li>
+        <li>Press "Save Settings" to store the message & recipient.</li>
+        <li><strong>Next NFC tap:</strong> Messages will open automatically with everything ready to send!</li>
+    </ol>
 
     <label for="messageSelect">Choose a Message:</label>
     <select id="messageSelect" onchange="checkCustomMessage()">
@@ -23,24 +31,35 @@
 
     <br><br>
 
-    <button onclick="shareMessage()">Send Message</button>
+    <button onclick="chooseRecipient()">Choose Contact</button>
+    <p id="selectedRecipient" style="color: green;"></p>
+
+    <br><br>
+
+    <button onclick="saveSettings()">Save Settings</button>
 
     <script>
-        // Load saved message and recipient on page load
+        let selectedRecipient = "";
+
         window.onload = function () {
             let savedMessage = localStorage.getItem("savedMessage");
             let savedRecipient = localStorage.getItem("savedRecipient");
 
             if (savedMessage) {
                 document.getElementById("messageSelect").value = savedMessage;
-                checkCustomMessage(); // Show custom message box if needed
+                checkCustomMessage();
+            }
+            
+            if (savedRecipient) {
+                selectedRecipient = savedRecipient;
+                document.getElementById("selectedRecipient").innerText = "Saved Contact: " + savedRecipient;
             }
 
             // Auto-open Messages app if both recipient and message are saved
             if (savedRecipient && savedMessage) {
                 setTimeout(() => {
                     window.location.href = `sms:${savedRecipient}?body=${encodeURIComponent(savedMessage)}`;
-                }, 1000); // Delay for smooth loading
+                }, 1500); // Delay for smooth loading
             }
         };
 
@@ -55,28 +74,41 @@
             }
         }
 
-        function shareMessage() {
+        function chooseRecipient() {
             let messageSelect = document.getElementById("messageSelect").value;
             let customMessageBox = document.getElementById("customMessage").value;
             let finalMessage = (messageSelect === "Custom") ? customMessageBox : messageSelect;
 
-            // Save message for next time
-            localStorage.setItem("savedMessage", finalMessage);
-
             if (navigator.share) {
                 navigator.share({
-                    title: "Quick Message",
+                    title: "Select Contact",
                     text: finalMessage
                 }).then(() => {
-                    // After sharing, prompt user to save the recipient
-                    let recipient = prompt("Enter the phone number of the person/group you sent this to:");
+                    let recipient = prompt("Enter the phone number of the person/group you selected:");
                     if (recipient) {
-                        localStorage.setItem("savedRecipient", recipient);
+                        selectedRecipient = recipient;
+                        document.getElementById("selectedRecipient").innerText = "Saved Contact: " + recipient;
                     }
                 }).catch(err => console.log("Sharing failed:", err));
             } else {
                 alert("Sharing is not supported on this browser.");
             }
+        }
+
+        function saveSettings() {
+            let messageSelect = document.getElementById("messageSelect").value;
+            let customMessageBox = document.getElementById("customMessage").value;
+            let finalMessage = (messageSelect === "Custom") ? customMessageBox : messageSelect;
+
+            if (!selectedRecipient) {
+                alert("Please choose a recipient first.");
+                return;
+            }
+
+            localStorage.setItem("savedMessage", finalMessage);
+            localStorage.setItem("savedRecipient", selectedRecipient);
+
+            alert("Message & contact saved! Next NFC tap will open Messages automatically.");
         }
     </script>
 </body>
