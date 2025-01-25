@@ -26,13 +26,21 @@
     <button onclick="shareMessage()">Send Message</button>
 
     <script>
-        // Load saved message on page load
+        // Load saved message and recipient on page load
         window.onload = function () {
             let savedMessage = localStorage.getItem("savedMessage");
+            let savedRecipient = localStorage.getItem("savedRecipient");
 
             if (savedMessage) {
                 document.getElementById("messageSelect").value = savedMessage;
                 checkCustomMessage(); // Show custom message box if needed
+            }
+
+            // Auto-open Messages app if both recipient and message are saved
+            if (savedRecipient && savedMessage) {
+                setTimeout(() => {
+                    window.location.href = `sms:${savedRecipient}?body=${encodeURIComponent(savedMessage)}`;
+                }, 1000); // Delay for smooth loading
             }
         };
 
@@ -53,15 +61,15 @@
             let finalMessage = (messageSelect === "Custom") ? customMessageBox : messageSelect;
 
             // Save message for next time
-            localStorage.setItem("savedMessage", messageSelect);
+            localStorage.setItem("savedMessage", finalMessage);
 
             if (navigator.share) {
                 navigator.share({
                     title: "Quick Message",
                     text: finalMessage
                 }).then(() => {
-                    // After sharing, save the recipient (browser can't detect recipient, so user confirms)
-                    let recipient = prompt("Enter the name of the person/group you sent this to:");
+                    // After sharing, prompt user to save the recipient
+                    let recipient = prompt("Enter the phone number of the person/group you sent this to:");
                     if (recipient) {
                         localStorage.setItem("savedRecipient", recipient);
                     }
