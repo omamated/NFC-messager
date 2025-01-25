@@ -8,11 +8,6 @@
 <body>
     <h2>Send a Quick Message</h2>
 
-    <label for="contactSelect">Choose a Contact:</label>
-    <input type="text" id="contactSelect" placeholder="Enter Name or Number">
-
-    <br><br>
-
     <label for="messageSelect">Choose a Message:</label>
     <select id="messageSelect" onchange="checkCustomMessage()">
         <option value="I'm home">I'm home</option>
@@ -31,14 +26,9 @@
     <button onclick="shareMessage()">Send Message</button>
 
     <script>
-        // Load saved contact and message on page load
+        // Load saved message on page load
         window.onload = function () {
-            let savedContact = localStorage.getItem("savedContact");
             let savedMessage = localStorage.getItem("savedMessage");
-
-            if (savedContact) {
-                document.getElementById("contactSelect").value = savedContact;
-            }
 
             if (savedMessage) {
                 document.getElementById("messageSelect").value = savedMessage;
@@ -58,24 +48,23 @@
         }
 
         function shareMessage() {
-            let contact = document.getElementById("contactSelect").value;
             let messageSelect = document.getElementById("messageSelect").value;
             let customMessageBox = document.getElementById("customMessage").value;
             let finalMessage = (messageSelect === "Custom") ? customMessageBox : messageSelect;
 
-            if (!contact) {
-                alert("Please enter a contact before sending.");
-                return;
-            }
-
-            // Save contact and message for next time
-            localStorage.setItem("savedContact", contact);
+            // Save message for next time
             localStorage.setItem("savedMessage", messageSelect);
 
             if (navigator.share) {
                 navigator.share({
                     title: "Quick Message",
-                    text: `To: ${contact}\n\n${finalMessage}`
+                    text: finalMessage
+                }).then(() => {
+                    // After sharing, save the recipient (browser can't detect recipient, so user confirms)
+                    let recipient = prompt("Enter the name of the person/group you sent this to:");
+                    if (recipient) {
+                        localStorage.setItem("savedRecipient", recipient);
+                    }
                 }).catch(err => console.log("Sharing failed:", err));
             } else {
                 alert("Sharing is not supported on this browser.");
