@@ -40,16 +40,13 @@
         function shareMessage() {
             let messageSelect = document.getElementById("messageSelect").value;
             let customMessageBox = document.getElementById("customMessage").value;
-
             let finalMessage = (messageSelect === "Custom") ? customMessageBox : messageSelect;
 
             if (navigator.share) {
                 navigator.share({
                     title: "Quick Message",
                     text: finalMessage
-                })
-                .then(() => console.log("Message shared!"))
-                .catch(err => console.log("Sharing failed:", err));
+                }).catch(err => console.log("Sharing failed:", err));
             } else {
                 alert("Sharing is not supported on this browser.");
             }
